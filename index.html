@@ -1,43 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Enigma</title>
-  <link rel="stylesheet" href="./style.css">
-</head>
-
-<body>
-  <header>
-    <h1>Enigma Machine</h1>
-    <button>Plugboard</button>
-  </header>
-  <div class="container">
-    <div class="container col">
-      <!-- Left side: Keyboards -->
-      <div class="keyboard" id="out-keyboard">
-        <h2>Output Keyboard</h2>
-      </div>
-      <div class="keyboard" id="inp-keyboard">
-        <h2>Input Keyboard</h2>
-      </div>
-    </div>
-
-    <!-- Right side: Two text fields -->
-    <div class="container col">
-      <div class="rotors container">
-        <h3>Setting: </h3>
-        <input type="number" min="1" max="26" value="1" class="rotor" />
-        <input type="number" min="1" max="26" value="1" class="rotor" />
-        <input type="number" min="1" max="26" value="1" class="rotor" />
-      </div>
-      <textarea id="input-field" placeholder="Input Text" rows="4"></textarea>
-      <textarea id="output-field" placeholder="Output Text" rows="4"></textarea>
-    </div>
-  </div>
-
-  <script src="./script.js" type="module"></script>
-</body>
-
+  <head>
+    <meta charset="UTF-8" />
+    <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enigma</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
