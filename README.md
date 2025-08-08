@@ -17,3 +17,12 @@
 - Mobile responsive design
 - Plugboard system (UI+Class)
 - Add a Reset Button
+
+## Plan of action:
+- mobile responsive
+- plugboard (both)
+- rotors on mobile
+- reset btn
+- refactoring chapter-02
+---
+<!-- ## backend dev begins -->
