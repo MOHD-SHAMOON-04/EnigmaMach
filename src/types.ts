@@ -1,14 +1,11 @@
 export interface KeyboardProps {
-  type: string;
+  type: 'out' | 'inp';
+  onPointerDown?: (e: React.PointerEvent<Element>) => void;
+  onPointerUp?: (e: React.PointerEvent<Element>) => void;
 }
 
 export interface KeyProps extends KeyboardProps {
   char: string;
-}
-
-export interface KeyPair {
-  inp: null | HTMLElement;
-  out: null | HTMLElement;
 }
 
 export interface Reflector {
@@ -17,4 +14,10 @@ export interface Reflector {
 
 export interface Rotor extends Reflector {
   head: number;
+}
+
+export interface UseRefMap {
+  inp: HTMLElement | null;
+  out: HTMLElement | null;
+  key: string | null;
 }

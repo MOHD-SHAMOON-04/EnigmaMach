@@ -1,110 +1,154 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Keyboard from "../components/Keyboard";
-import type { KeyPair } from "../types";
+import Rotor from "../components/Rotor";
+import CopyBtn from '../components/CopyBtn';
 import EnigmaEngine from "../utils/Enigma";
+import type { UseRefMap } from "../types";
+
+const enigma = new EnigmaEngine([1, 1, 1]);
+
+const validKey = (enteredKey: string): boolean => /^[A-Z]$/.test(enteredKey);
 
 function Enigma() {
-  const [rotors, setRotors] = useState({ r1: 1, r2: 1, r3: 1 });
-  const [keyPair, setKeyPair] = useState({ inp: null, out: null } as KeyPair);
-  const enigma = new EnigmaEngine([1, 1, 1]);
+  const [rotors, setRotors] = useState([] as number[]);
+  useEffect(() => {
+    setRotors([...enigma.getHeads()]);
+  }, []);
+
+  const glowingKey = useRef<UseRefMap>({ inp: null, out: null, key: null });
+
+  // utility for encoding ----------
+  const encodeKey = (enteredKey: string) => {
+    const encoded = enigma.scrambleChar(enteredKey);
+    const heads = enigma.getHeads();
+    setRotors([...heads]);
+    return encoded;
+  };
+  // utility for encoding ----------
+
+  // Keyboard events handling ----------
+  const physicalKeyPress = (e: KeyboardEvent) => {
+    const enteredKey = e.key.toUpperCase();
+
+    if (!validKey(enteredKey)) return;
+    if (glowingKey.current.key !== null) return;
+
+    const encodedKey = encodeKey(enteredKey);
+    setInputText((prev) => prev + enteredKey);
+    setOutputText((prev) => prev + encodedKey);
+
+    const inpKey = document.querySelector(`#inp-${enteredKey}`) as HTMLElement | null;
+    const outKey = document.querySelector(`#out-${encodedKey}`) as HTMLElement | null;
+    if (!inpKey || !outKey) return;
+
+    glowOnAll(inpKey, outKey, enteredKey);
+  };
+
+  const physicalKeyUp = (e: KeyboardEvent) => {
+    if (e.key.toUpperCase() === glowingKey.current.key) {
+      const { inp, out } = glowingKey.current;
+      if (inp && out) glowOffAll(inp, out);
+    }
+  };
+  // Keyboard events handling ----------
+
+  // Common utility functions for key glow ----------
+  const glowOnAll = (inpKey: HTMLElement, outKey: HTMLElement, key: string) => {
+    inpKey.classList.add('glow');
+    outKey.classList.add('glow');
+    glowingKey.current = { inp: inpKey, out: outKey, key };
+  };
+
+  const glowOffAll = (inpKey: HTMLElement, outKey: HTMLElement) => {
+    inpKey.classList.remove('glow');
+    outKey.classList.remove('glow');
+    glowingKey.current = { inp: null, out: null, key: null };
+  };
+  // Common utility functions for key glow ----------
+
+  // Handling window change/blur aka tab change, meta key ----------
+  const windowBlur = () => {
+    const { inp, out } = glowingKey.current;
+    if (inp && out) glowOffAll(inp, out);
+  }
+  // Handling window change/blur aka tab change, meta key ----------
+
+  // Pointer events handling(touch+mouse) ----------
+  const handleVirtualKeyDown = (e: React.PointerEvent) => {
+    const ele = e.target as HTMLElement;
+
+    if (!ele.classList.contains('_KEY')) return;
+
+    const char = ele.dataset.char;
+    if (!char || !validKey(char)) return;
+    if (glowingKey.current.key !== null) return;
+
+    const encodedKey = encodeKey(char);
+    setInputText((prev) => prev + char);
+    setOutputText((prev) => prev + encodedKey);
+
+    const inpKey = document.querySelector(`#inp-${char}`) as HTMLElement | null;
+    const outKey = document.querySelector(`#out-${encodedKey}`) as HTMLElement | null;
+    if (!inpKey || !outKey) return;
+
+    glowOnAll(inpKey, outKey, char);
+  };
+
+  const handleVirtualKeyUp = () => {
+    const { inp, out } = glowingKey.current;
+    if (inp && out) glowOffAll(inp, out);
+  };
+  // Pointer events handling(touch+mouse) ----------
+
+  // handler for updating rotor setting ----------
+  const handleRotorChange = (index: number, newVal: number) => {
+    console.log(`${index} : ${newVal}`);
+    const newRotors = [...rotors];
+    newRotors[index] = newVal;
+
+    setRotors(newRotors);
+    enigma.setHeads(newRotors);
+  };
+  // handler for updating rotor setting ----------
+
+  // handler for copying inp/out ----------
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      console.log('Copied:', text);
+
+    }).catch((err) => {
+      console.error('Failed to copy:', err);
+    });
+  };
+  // handler for copying inp/out ----------
 
   useEffect(() => {
-    const keyGlowOn = (keyEle: HTMLElement) => {
-      if (keyEle) {
-        keyEle.classList.add('glow');
-      }
-    };
-
-    const keyGlowOff = (keyEle: HTMLElement) => {
-      if (keyEle) {
-        keyEle.classList.remove('glow');
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const enteredKey = e.key.toLowerCase();
-      if (e.key.length > 1 || keyPair.inp != null) return;
-
-      // const alphs = "abcdefghijklmnopqrstuvwxyz0123456789";
-      const alphs = "abcdefghijklmnopqrstuvwxyz";
-      if (!alphs.includes(enteredKey)) return;
-
-      handleEncoding(enteredKey);
-    };
-
-    const handleKeyUp = () => {
-      if (keyPair.inp) {
-        keyGlowOff(keyPair.inp);
-        setKeyPair({ ...keyPair, inp: null });
-      }
-      if (keyPair.out) {
-        keyGlowOff(keyPair.out);
-        setKeyPair({ ...keyPair, out: null });
-      }
-    };
-
-    const handleEncoding = (enteredKey: string) => {
-      const encInp = enigma.scrambleChar(enteredKey);
-      const heads = enigma.getHeads();
-      setRotors({
-        r1: heads[0],
-        r2: heads[1],
-        r3: heads[2]
-      })
-
-      const inpRef = document.querySelector(`#inp-${enteredKey}`) as HTMLElement;
-      const outRef = document.querySelector(`#out-${encInp}`) as HTMLElement;
-
-      // inputField.value += enteredKey;
-      // outputField.value += encInp;
-
-      keyGlowOn(inpRef);
-      keyGlowOn(outRef);
-
-      setKeyPair({
-        inp: inpRef,
-        out: outRef,
-      })
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('keydown', physicalKeyPress);
+    document.addEventListener('keyup', physicalKeyUp);
+    window.addEventListener('blur', windowBlur);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('keydown', physicalKeyPress);
+      document.removeEventListener('keyup', physicalKeyUp);
+      window.removeEventListener('blur', windowBlur);
     }
   }, []);
 
+  const [inputText, setInputText] = useState('');
+  const [outputText, setOutputText] = useState('');
+
   return (
-    <div className="flex justify-evenly items-start mt-4">
+    <div className="flex flex-col-reverse lg:flex-row justify-center items-start mt-4 gap-6 px-4">
 
       {/* Left side: Keyboards */}
       <div className="flex flex-col justify-center items-center">
-        <div
-          id="out-keyboard"
-          className="bg-zinc-800 p-4 rounded m-auto flex flex-col items-center mb-6 gap-3"
-        >
-          <h2 className="mr-auto text-2xl font-bold mb-2">Output Keyboard</h2>
-          <Keyboard type={"out"} />
-        </div>
+        <Keyboard type="out" />
 
-        <div
-          id="inp-keyboard"
-          className="bg-zinc-800 p-4 rounded m-auto flex flex-col items-center mb-6 gap-4"
-          onClick={e => {
-            const ele = e.target as HTMLButtonElement;
-            if (ele.classList.contains('_KEY')) {
-              ele.classList.add('glow');
-              setTimeout(() => {
-                ele.classList.remove('glow');
-              }, 2000);
-            }
-          }}
-        >
-          <h2 className="mr-auto text-2xl font-bold mb-2">Input Keyboard</h2>
-          <Keyboard type={"inp"} />
-        </div>
+        <Keyboard
+          type="inp"
+          onPointerDown={handleVirtualKeyDown}
+          onPointerUp={handleVirtualKeyUp}
+        />
       </div>
 
       <div className="flex flex-col justify-center items-center gap-6 font-mono">
@@ -112,41 +156,73 @@ function Enigma() {
         {/* Right side: Settings */}
         <div
           id="rotors"
-          className="bg-zinc-800 p-2 rounded flex gap-2 justify-center items-center">
+          className="_ROTORS bg-zinc-800 p-2 rounded flex gap-2 justify-center items-center">
           <h3 className="text-xl font-bold">Setting: </h3>
-          <input
-            type="number"
-            min="1"
-            max="26"
-            defaultValue={1}
-            className="_ROTOR w-14 h-10 p-2 border-b-zinc-900 border-2 rounded bg-zinc-50 text-zinc-950 transition-all outline-none focus:border-emerald-200 focus:bg-emerald-50" />
-          <input
-            type="number"
-            min="1"
-            max="26"
-            defaultValue={1}
-            className="_ROTOR w-14 h-10 p-2 border-b-zinc-900 border-2 rounded bg-zinc-50 text-zinc-950 transition-all outline-none focus:border-emerald-200 focus:bg-emerald-50" />
-          <input
-            type="number"
-            min="1"
-            max="26"
-            defaultValue={1}
-            className="_ROTOR w-14 h-10 p-2 border-b-zinc-900 border-2 rounded bg-zinc-50 text-zinc-950 transition-all outline-none focus:border-emerald-200 focus:bg-emerald-50" />
+          <div className="flex flex-row-reverse">
+            {rotors.map((r, idx) => (
+              <Rotor
+                value={r}
+                id={`rotor-${idx}`}
+                key={idx}
+                onChange={(newVal) => handleRotorChange(idx, newVal)}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Right side: INPUT/OUTPUT text fields */}
-        <textarea
+        <div className="w-full max-w-[500px]">
+          <div className="flex justify-between items-center mb-1">
+            <label htmlFor="input-field" className="font-semibold">Input</label>
+            <CopyBtn onClick={() => handleCopy(inputText)} />
+          </div>
+          <textarea
+            id="input-field"
+            placeholder="Input Text"
+            defaultValue={inputText}
+            disabled={true}
+            onKeyDown={(e) => e.preventDefault()}
+            rows={4}
+            className="w-full resize-y p-2.5 text-lg outline-none border-2 border-blue-300 bg-zinc-50 text-zinc-950 rounded"
+          ></textarea>
+        </div>
+
+        <div className="w-full max-w-[500px] mt-4">
+          <div className="flex justify-between items-center mb-1">
+            <label htmlFor="output-field" className="font-semibold">Output</label>
+            <CopyBtn onClick={() => handleCopy(outputText)} />
+          </div>
+          <textarea
+            id="output-field"
+            placeholder="Output Text"
+            defaultValue={outputText}
+            disabled={true}
+            onKeyDown={(e) => e.preventDefault()}
+            rows={4}
+            className="w-full resize-y p-2.5 text-lg outline-none border-2 border-blue-300 bg-zinc-50 text-zinc-950 rounded"
+          ></textarea>
+        </div>
+
+        {/* <textarea
           id="input-field"
           placeholder="Input Text"
+          defaultValue={inputText}
+          disabled={true}
+          onKeyDown={(e) => e.preventDefault()}
+          // value={inputText}
+          // onChange={handleInputChange}
           rows={4}
           className="w-full max-w-[500px] resize-y p-2.5 text-lg outline-none border-2 border-blue-300 bg-zinc-50 text-zinc-950 rounded"
         ></textarea>
         <textarea
           id="output-field"
           placeholder="Output Text"
+          defaultValue={outputText}
+          disabled={true}
+          onKeyDown={(e) => e.preventDefault()}
           rows={4}
           className="w-full max-w-[500px] resize-y p-2.5 text-lg outline-none border-2 border-blue-300 bg-zinc-50 text-zinc-950 rounded"
-        ></textarea>
+        ></textarea> */}
 
       </div>
     </div>
@@ -154,8 +230,3 @@ function Enigma() {
 }
 
 export default Enigma;
-
-// TODO:
-// - link rotors
-// - link input and output text fields with JIT enc & dec
-// - fix infinite glow

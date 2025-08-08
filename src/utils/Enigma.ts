@@ -6,26 +6,30 @@ export default class EnigmaEngine {
   reflector: Reflector;
 
   constructor([r1 = 1, r2 = 1, r3 = 1]: number[]) {
-    this.validChars = "abcdefghijklmnopqrstuvwxyz";
+    this.validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     this.rotors = [
       {
-        map: "hegwzxspomryiqtcdaflvjkbun",
+        map: "HEGWZXSPOMRYIQTCDAFLVJKBUN",
         head: 0
       },
       {
-        map: "yfaxsvbqjltpmdwnicugehrzok",
+        map: "YFAXSVBQJLTPMDWNICUGEHRZOK",
         head: 0
       },
       {
-        map: "bpsiwzadrfexumqcokyljhnvtg",
+        map: "BPSIWZADRFEXUMQCOKYLJHNVTG",
         head: 0
       },
     ];
     this.reflector = {
-      map: "ghijklabcdefnmuvwxyzopqrst"
+      map: "GHIJKLABCDEFNMUVWXYZOPQRST"
     }
     this.setHeads([r1, r2, r3]);
     // this.plugboard
+  }
+
+  reset() {
+    this.rotors.forEach(r => r.head = 0);
   }
 
   setHeads([r1, r2, r3]: number[]) {
@@ -35,11 +39,8 @@ export default class EnigmaEngine {
   }
 
   getHeads() {
-    const arr = [];
-    for (let i = this.rotors.length - 1; i >= 0; i--) {
-      arr.push(this.rotors[i].head);
-    }
-    return arr;
+    return this.rotors.map(r => r.head + 1);
+    // as wrapping logic is already handled internally
   }
 
   rotate(rotorIndex: number) {
@@ -49,11 +50,14 @@ export default class EnigmaEngine {
   }
 
   scrambleString(str = "") {
-    return str.split('').map(char => this.scrambleChar(char)).join('');
+    return str
+      .toUpperCase()
+      .split('')
+      .map(char => this.scrambleChar(char)).join('');
   }
 
   scrambleChar(char = "") {
-    let newChar = char.toLowerCase();
+    let newChar = char.toUpperCase();
     if (newChar === ' ') return ' ';
     if (!this.validChars.includes(newChar)) return newChar;
 
