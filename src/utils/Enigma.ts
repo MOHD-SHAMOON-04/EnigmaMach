@@ -1,9 +1,10 @@
-import type { Reflector, Rotor } from '../types';
+import type { Reflector, Rotor, Plugboard } from '../types';
 
 export default class EnigmaEngine {
   validChars: string;
   rotors: Rotor[];
   reflector: Reflector;
+  plugboard: Plugboard;
 
   constructor([r1 = 1, r2 = 1, r3 = 1]: number[]) {
     this.validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -29,7 +30,9 @@ export default class EnigmaEngine {
       map: "EJMZALYXVBWFCRQUONTSPIKHGD"
     }
     this.setHeads([r1, r2, r3]);
-    // this.plugboard
+    this.plugboard = {
+      map: "MDLBPHSFJIXCAZQEORGTUVWKYN"
+    }
   }
 
   reset() {
@@ -65,6 +68,9 @@ export default class EnigmaEngine {
     if (newChar === ' ') return ' ';
     if (!this.validChars.includes(newChar)) return newChar;
 
+    // Plugboard 1st map
+    newChar = this.plugboard.map[this.validChars.indexOf(newChar)];
+
     // forward pass
     for (let i = 0; i < this.rotors.length; i++) {
       const r = this.rotors[i];
@@ -86,6 +92,9 @@ export default class EnigmaEngine {
       const idx = r.map.indexOf(newChar);
       newChar = this.validChars[(idx - r.head + 26) % 26];
     }
+
+    // Plugboard 2nd map
+    newChar = this.plugboard.map[this.validChars.indexOf(newChar)];
 
     if (this.rotate(0)) {
       if (this.rotate(1)) {
