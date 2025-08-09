@@ -9,20 +9,24 @@ export default class EnigmaEngine {
     this.validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     this.rotors = [
       {
-        map: "HEGWZXSPOMRYIQTCDAFLVJKBUN",
+        // Rotor #VI - 1939 - M3 & M4 Naval (FEB 1942)
+        map: "JPGVOUMFYQBENHZRDKASXLICTW",
         head: 0
       },
       {
-        map: "YFAXSVBQJLTPMDWNICUGEHRZOK",
+        // Rotor #VII - 1939 - M3 & M4 Naval (FEB 1942)
+        map: "NZJHGRCXMYSWBOUFAIVLPEKQDT",
         head: 0
       },
       {
-        map: "BPSIWZADRFEXUMQCOKYLJHNVTG",
+        // Rotor #VIII - 1939 - M3 & M4 Naval (FEB 1942)
+        map: "FKQHTLXOCBJSPDZRAMEWNIUYGV",
         head: 0
       },
     ];
     this.reflector = {
-      map: "GHIJKLABCDEFNMUVWXYZOPQRST"
+      // Rotor #Reflector_A
+      map: "EJMZALYXVBWFCRQUONTSPIKHGD"
     }
     this.setHeads([r1, r2, r3]);
     // this.plugboard
@@ -92,3 +96,6 @@ export default class EnigmaEngine {
     return newChar;
   }
 }
+
+// The original wirings/mapping used, taken from =>
+// https://en.wikipedia.org/wiki/Enigma_rotor_details#Rotor_wiring_tables
