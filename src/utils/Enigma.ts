@@ -50,6 +50,21 @@ export default class EnigmaEngine {
     // as wrapping logic is already handled internally
   }
 
+  setPlugboard(newMap: string) {
+    if (newMap.length !== 26) return;
+
+    newMap = newMap.toUpperCase();
+    for (let i = 0; i < 26; i++) {
+      if (!this.validChars.includes(newMap[i])) return;
+    }
+
+    this.plugboard.map = newMap;
+  }
+
+  getPlugboard() {
+    return this.plugboard.map;
+  }
+
   rotate(rotorIndex: number) {
     const rotor = this.rotors[rotorIndex];
     rotor.head = (rotor.head + 1) % 26;
