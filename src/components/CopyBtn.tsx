@@ -20,7 +20,7 @@ const CopyBtn = ({ onClick }: { onClick: () => void }) => {
   return (
     <button
       onClick={handleClick}
-      className="ml-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+      className="ml-2 text-sm text-blue-600 hover:text-blue-800 transition-colors cursor-pointer bg-zinc-700 rounded p-1"
       title={copied ? "Copied!" : "Copy to clipboard"}
     >
       {copied ? "✅" : "📋"}

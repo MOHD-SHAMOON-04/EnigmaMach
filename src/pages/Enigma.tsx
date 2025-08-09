@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import Keyboard from "../components/Keyboard";
 import Rotor from "../components/Rotor";
-import CopyBtn from '../components/CopyBtn';
 import EnigmaEngine from "../utils/Enigma";
 import type { UseRefMap } from "../types";
+import TextField from "../components/TextField";
 
 const enigma = new EnigmaEngine([1, 1, 1]);
 
@@ -158,6 +158,7 @@ function Enigma() {
           id="rotors"
           className="_ROTORS bg-zinc-800 p-2 rounded flex gap-2 justify-center items-center">
           <h3 className="text-xl font-bold">Setting: </h3>
+          {/* The 3 Rotors */}
           <div className="flex flex-row-reverse">
             {rotors.map((r, idx) => (
               <Rotor
@@ -171,58 +172,20 @@ function Enigma() {
         </div>
 
         {/* Right side: INPUT/OUTPUT text fields */}
-        <div className="w-full max-w-[500px]">
-          <div className="flex justify-between items-center mb-1">
-            <label htmlFor="input-field" className="font-semibold">Input</label>
-            <CopyBtn onClick={() => handleCopy(inputText)} />
-          </div>
-          <textarea
-            id="input-field"
-            placeholder="Input Text"
-            defaultValue={inputText}
-            disabled={true}
-            onKeyDown={(e) => e.preventDefault()}
-            rows={4}
-            className="w-full resize-y p-2.5 text-lg outline-none border-2 border-blue-300 bg-zinc-50 text-zinc-950 rounded"
-          ></textarea>
+        <div className="flex flex-col gap-2">
+          <TextField
+            handleCopy={handleCopy}
+            text={inputText}
+            setText={setInputText}
+            label={"Input"}
+          />
+          <TextField
+            handleCopy={handleCopy}
+            text={outputText}
+            setText={setOutputText}
+            label={"Output"}
+          />
         </div>
-
-        <div className="w-full max-w-[500px] mt-4">
-          <div className="flex justify-between items-center mb-1">
-            <label htmlFor="output-field" className="font-semibold">Output</label>
-            <CopyBtn onClick={() => handleCopy(outputText)} />
-          </div>
-          <textarea
-            id="output-field"
-            placeholder="Output Text"
-            defaultValue={outputText}
-            disabled={true}
-            onKeyDown={(e) => e.preventDefault()}
-            rows={4}
-            className="w-full resize-y p-2.5 text-lg outline-none border-2 border-blue-300 bg-zinc-50 text-zinc-950 rounded"
-          ></textarea>
-        </div>
-
-        {/* <textarea
-          id="input-field"
-          placeholder="Input Text"
-          defaultValue={inputText}
-          disabled={true}
-          onKeyDown={(e) => e.preventDefault()}
-          // value={inputText}
-          // onChange={handleInputChange}
-          rows={4}
-          className="w-full max-w-[500px] resize-y p-2.5 text-lg outline-none border-2 border-blue-300 bg-zinc-50 text-zinc-950 rounded"
-        ></textarea>
-        <textarea
-          id="output-field"
-          placeholder="Output Text"
-          defaultValue={outputText}
-          disabled={true}
-          onKeyDown={(e) => e.preventDefault()}
-          rows={4}
-          className="w-full max-w-[500px] resize-y p-2.5 text-lg outline-none border-2 border-blue-300 bg-zinc-50 text-zinc-950 rounded"
-        ></textarea> */}
 
       </div>
     </div>

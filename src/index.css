@@ -4,19 +4,6 @@
   --color-gold-100: #FFECB3;
   --color-gold-200: #FFD700;
   --color-gold-300: #FFC107;
-
-  /* --animate-glow: glow 0.2s ease-out;
-
-  @keyframes glow {
-    0% {
-      boxShadow: '0 0 15px 3px gold-200'
-    }
-
-    100% {
-      transform: scale(1.01);
-      boxShadow: '0 0 15px 3px gold-200'
-    }
-  } */
 }
 
 .glow {
