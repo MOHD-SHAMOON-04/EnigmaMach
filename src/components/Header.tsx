@@ -31,7 +31,7 @@ export default function Header() {
         role="button"
         tabIndex={0}
         onClick={handleClick}
-        className='text-3xl font-bold cursor-pointer'
+        className='text-lg lg:text-3xl font-bold cursor-pointer'
       >
         Enigma Machine
       </h1>
@@ -62,7 +62,7 @@ export default function Header() {
         </nav>
       )}
 
-      <button className='font-mono bg-indigo-900 text-slate-50 rounded transition-all duration-300 ease-in-out py-2 px-4 hover:bg-indigo-800 cursor-pointer'>
+      <button className='text-xs lg:text-sm font-mono bg-indigo-900 text-slate-50 rounded transition-all duration-300 ease-in-out py-2 px-4 hover:bg-indigo-800 active:bg-indigo-800 cursor-pointer'>
         Plugboard
       </button>
     </header>

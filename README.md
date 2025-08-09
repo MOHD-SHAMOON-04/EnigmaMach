@@ -13,15 +13,15 @@
 - Copy button with tick
 
 ## what left
-- Fix rotors on mobile
-- Mobile responsive design
+- Fix rotors on mobile ✅
+- Mobile responsive design ✅
 - Plugboard system (UI+Class)
 - Add a Reset Button
 
 ## Plan of action:
-- mobile responsive
+- mobile responsive ✅
 - plugboard (both)
-- rotors on mobile
+- rotors on mobile ✅
 - reset btn
 - refactoring chapter-02
 ---

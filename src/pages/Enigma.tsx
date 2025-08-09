@@ -138,7 +138,7 @@ function Enigma() {
   const [outputText, setOutputText] = useState('');
 
   return (
-    <div className="flex flex-col-reverse lg:flex-row justify-center items-start mt-4 gap-6 px-4">
+    <div className="flex flex-col-reverse lg:flex-row justify-center lg:items-start mt-4 gap-6 px-4">
 
       {/* Left side: Keyboards */}
       <div className="flex flex-col justify-center items-center">
@@ -151,13 +151,13 @@ function Enigma() {
         />
       </div>
 
-      <div className="flex flex-col justify-center items-center gap-6 font-mono">
+      <div className="flex flex-col justify-center items-center gap-3 lg:gap-6 font-mono">
 
         {/* Right side: Settings */}
         <div
           id="rotors"
           className="_ROTORS bg-zinc-800 p-2 rounded flex gap-2 justify-center items-center">
-          <h3 className="text-xl font-bold">Setting: </h3>
+          <h3 className="lg:text-xl font-bold">Setting</h3>
           {/* The 3 Rotors */}
           <div className="flex flex-row-reverse">
             {rotors.map((r, idx) => (
@@ -172,7 +172,7 @@ function Enigma() {
         </div>
 
         {/* Right side: INPUT/OUTPUT text fields */}
-        <div className="flex flex-col gap-2">
+        <div className="flex lg:flex-col gap-2 lg:w-full">
           <TextField
             handleCopy={handleCopy}
             text={inputText}

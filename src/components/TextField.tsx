@@ -8,7 +8,7 @@ interface TextFieldProps {
 
 export default function TextField({ handleCopy, text, setText, label }: TextFieldProps) {
   return (
-    <div className="w-full max-w-[500px] bg-zinc-700/50 py-1 px-2 rounded">
+    <div className="w-full bg-zinc-700/50 py-1 px-2 rounded">
       <div className="flex justify-between items-center mb-1">
         <label
           htmlFor={`${label.toLowerCase()}-field`}
@@ -17,7 +17,7 @@ export default function TextField({ handleCopy, text, setText, label }: TextFiel
         </label>
         <CopyBtn onClick={() => handleCopy(text)} />
         <button
-          className="ml-4 cursor-pointer bg-zinc-700 rounded"
+          className="ml-3 lg:ml-4 cursor-pointer bg-zinc-700 rounded p-0.5"
           onClick={() => setText("")}
         >
           ❌
@@ -30,7 +30,7 @@ export default function TextField({ handleCopy, text, setText, label }: TextFiel
         disabled={true}
         onKeyDown={(e) => e.preventDefault()}
         rows={4}
-        className="w-full resize-y p-2.5 text-lg outline-none bg-zinc-50 text-zinc-950 rounded"
+        className="w-full resize-y p-1 lg:p-2.5 lg:text-lg outline-none bg-zinc-50 text-zinc-950 rounded"
       ></textarea>
     </div>
   )
