@@ -7,7 +7,7 @@ import TextField from "../components/TextField";
 
 const enigma = new EnigmaEngine([1, 1, 1]);
 
-const validKey = (enteredKey: string): boolean => /^[A-Z]$/.test(enteredKey);
+const validKey = (enteredKey: string): boolean => /^[A-Z ]$/.test(enteredKey);
 
 function Enigma() {
   const [rotors, setRotors] = useState([] as number[]);
@@ -18,7 +18,7 @@ function Enigma() {
   const glowingKey = useRef<UseRefMap>({ inp: null, out: null, key: null });
 
   // utility for encoding ----------
-  const encodeKey = (enteredKey: string) => {
+  const encodeChar = (enteredKey: string) => {
     const encoded = enigma.scrambleChar(enteredKey);
     const heads = enigma.getHeads();
     setRotors([...heads]);
@@ -33,12 +33,12 @@ function Enigma() {
     if (!validKey(enteredKey)) return;
     if (glowingKey.current.key !== null) return;
 
-    const encodedKey = encodeKey(enteredKey);
+    const encodedKey = encodeChar(enteredKey);
     setInputText((prev) => prev + enteredKey);
     setOutputText((prev) => prev + encodedKey);
 
-    const inpKey = document.querySelector(`#inp-${enteredKey}`) as HTMLElement | null;
-    const outKey = document.querySelector(`#out-${encodedKey}`) as HTMLElement | null;
+    const inpKey = document.querySelector(`#inp-${enteredKey !== ' ' ? enteredKey : "SPACE"}`) as HTMLElement | null;
+    const outKey = document.querySelector(`#out-${encodedKey !== ' ' ? encodedKey : "SPACE"}`) as HTMLElement | null;
     if (!inpKey || !outKey) return;
 
     glowOnAll(inpKey, outKey, enteredKey);
@@ -83,12 +83,12 @@ function Enigma() {
     if (!char || !validKey(char)) return;
     if (glowingKey.current.key !== null) return;
 
-    const encodedKey = encodeKey(char);
+    const encodedKey = encodeChar(char);
     setInputText((prev) => prev + char);
     setOutputText((prev) => prev + encodedKey);
 
-    const inpKey = document.querySelector(`#inp-${char}`) as HTMLElement | null;
-    const outKey = document.querySelector(`#out-${encodedKey}`) as HTMLElement | null;
+    const inpKey = document.querySelector(`#inp-${char !== ' ' ? char : "SPACE"}`) as HTMLElement | null;
+    const outKey = document.querySelector(`#out-${encodedKey !== ' ' ? encodedKey : "SPACE"}`) as HTMLElement | null;
     if (!inpKey || !outKey) return;
 
     glowOnAll(inpKey, outKey, char);
@@ -138,56 +138,61 @@ function Enigma() {
   const [outputText, setOutputText] = useState('');
 
   return (
-    <div className="flex flex-col-reverse lg:flex-row justify-center lg:items-start mt-4 gap-6 px-4">
+    <div>
+      <div className="flex flex-col-reverse lg:flex-row justify-center lg:items-start mt-4 gap-6 px-4">
 
-      {/* Left side: Keyboards */}
-      <div className="flex flex-col justify-center items-center">
-        <Keyboard type="out" />
+        {/* Left side: Keyboards */}
+        <div className="flex flex-col justify-center items-center">
+          <Keyboard type="out" />
 
-        <Keyboard
-          type="inp"
-          onPointerDown={handleVirtualKeyDown}
-          onPointerUp={handleVirtualKeyUp}
-        />
-      </div>
+          <Keyboard
+            type="inp"
+            onPointerDown={handleVirtualKeyDown}
+            onPointerUp={handleVirtualKeyUp}
+          />
+        </div>
 
-      <div className="flex flex-col justify-center items-center gap-3 lg:gap-6 font-mono">
+        <div className="flex flex-col justify-center items-center gap-3 lg:gap-6 font-mono">
 
-        {/* Right side: Settings */}
-        <div
-          id="rotors"
-          className="_ROTORS bg-zinc-800 p-2 rounded flex gap-2 justify-center items-center">
-          <h3 className="lg:text-xl font-bold">Setting</h3>
-          {/* The 3 Rotors */}
-          <div className="flex flex-row-reverse">
-            {rotors.map((r, idx) => (
-              <Rotor
-                value={r}
-                id={`rotor-${idx}`}
-                key={idx}
-                onChange={(newVal) => handleRotorChange(idx, newVal)}
-              />
-            ))}
+          {/* Right side: Settings */}
+          <div
+            id="rotors"
+            className="_ROTORS bg-zinc-800 p-2 rounded flex gap-2 justify-center items-center">
+            <h3 className="lg:text-xl font-bold">Setting</h3>
+            {/* The 3 Rotors */}
+            <div className="flex flex-row-reverse">
+              {rotors.map((r, idx) => (
+                <Rotor
+                  value={r}
+                  id={`rotor-${idx}`}
+                  key={idx}
+                  onChange={(newVal) => handleRotorChange(idx, newVal)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Right side: INPUT/OUTPUT text fields */}
-        <div className="flex lg:flex-col gap-2 lg:w-full">
-          <TextField
-            handleCopy={handleCopy}
-            text={inputText}
-            setText={setInputText}
-            label={"Input"}
-          />
-          <TextField
-            handleCopy={handleCopy}
-            text={outputText}
-            setText={setOutputText}
-            label={"Output"}
-          />
-        </div>
+          {/* Right side: INPUT/OUTPUT text fields */}
+          <div className="flex lg:flex-col gap-2 lg:w-full">
+            <TextField
+              handleCopy={handleCopy}
+              text={inputText}
+              setText={setInputText}
+              label={"Input"}
+            />
+            <TextField
+              handleCopy={handleCopy}
+              text={outputText}
+              setText={setOutputText}
+              label={"Output"}
+            />
+          </div>
 
+        </div>
       </div>
+
+      {/* // Plugboard to be Inserted here */}
+
     </div>
   )
 }

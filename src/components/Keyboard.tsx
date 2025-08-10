@@ -1,5 +1,6 @@
 import type { KeyboardProps } from '../types';
 import Key from './Key';
+import SpaceKey from './SpaceKey';
 
 export default function Keyboard({ type, onPointerDown, onPointerUp }: KeyboardProps) {
   const layout = ["QWERTZUIO", "ASDFGHJK", "PYXCVBNML"];
@@ -22,6 +23,9 @@ export default function Keyboard({ type, onPointerDown, onPointerUp }: KeyboardP
           }
         </div>
       )}
+      <div className="_ROW flex select-none touch-manipulation">
+        <SpaceKey type={type} char={" "} />
+      </div>
     </div>
   );
 }
