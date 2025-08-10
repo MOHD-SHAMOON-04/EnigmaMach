@@ -19,6 +19,8 @@ export interface Rotor extends Reflector {
 export interface Plugboard extends Reflector {
 }
 
+export type CharMap = Map<string, string>;
+
 export interface UseRefMap {
   inp: HTMLElement | null;
   out: HTMLElement | null;

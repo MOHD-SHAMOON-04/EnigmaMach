@@ -1,4 +1,4 @@
-import type { Reflector, Rotor, Plugboard } from '../types';
+import type { Reflector, Rotor, Plugboard, CharMap } from '../types';
 
 export default class EnigmaEngine {
   validChars: string;
@@ -50,19 +50,68 @@ export default class EnigmaEngine {
     // as wrapping logic is already handled internally
   }
 
-  setPlugboard(newMap: string) {
-    if (newMap.length !== 26) return;
+  isValidPlugboardMap(map: CharMap) {
+    const seen = new Set();
 
-    newMap = newMap.toUpperCase();
-    for (let i = 0; i < 26; i++) {
-      if (!this.validChars.includes(newMap[i])) return;
+    for (const [a, b] of map.entries()) {
+      if (a === b) return false; // No self pairing
+      seen.add(a);
+      seen.add(b);
+      if (map.get(b) !== a) return false; // not symmetric
     }
 
-    this.plugboard.map = newMap;
+    return [...map.keys()].every(c => this.validChars.includes(c)) &&
+      [...map.values()].every(c => this.validChars.includes(c)) &&
+      seen.size <= 20; // at max: 10 pairs of 2 ele each
+  }
+
+  setPlugboard(setMap: CharMap) {
+    // should receive a Map() representaion of the plugboard
+    if (!this.isValidPlugboardMap(setMap)) return false;
+
+    // yess a valid plugboard
+    let newStr = "";
+
+    for (const char of this.validChars) {
+      if (setMap.has(char)) {
+        newStr += setMap.get(char);
+      } else {
+        newStr += char;
+      }
+    }
+
+    this.plugboard.map = newStr;
+    return true;
   }
 
   getPlugboard() {
-    return this.plugboard.map;
+    // should return a Map() representaion of the plugboard
+    const getMap = new Map() as CharMap;
+    const alphabet = this.validChars;
+    const currentStr = this.plugboard.map.toUpperCase();
+
+    // paranoid err checking
+    if (currentStr.length !== 26) {
+      throw new Error("Plugboard string must be exactly 26 characters.");
+    }
+
+    for (let i = 0; i < 26; i++) {
+      const from = alphabet[i];
+      const to = currentStr[i];
+
+      if (from !== to) {
+        // again paranoid err checking
+        // Check for consistency
+        if (getMap.has(to) && getMap.get(to) !== from) {
+          throw new Error(`Inconsistent mapping: ${from} -> ${to}, but ${to} already mapped to ${getMap.get(to)}`);
+        }
+
+        getMap.set(from, to);
+        getMap.set(to, from); // Ensure bidirectional
+      }
+    }
+
+    return getMap;
   }
 
   rotate(rotorIndex: number) {
@@ -120,6 +169,36 @@ export default class EnigmaEngine {
     return newChar;
   }
 }
+
+(() => {
+  const machine = new EnigmaEngine([1, 1, 1]);
+  const plug = new Map([
+    ["A", "M"],
+    ["M", "A"],
+    ["B", "D"],
+    ["D", "B"],
+    // ["C", "L"],
+    // ["L", "C"],
+    // ["E", "P"],
+    // ["P", "E"],
+    // ["F", "H"],
+    // ["H", "F"],
+    // ["G", "S"],
+    // ["S", "G"],
+    // ["I", "J"],
+    // ["J", "I"],
+    // ["K", "X"],
+    // ["X", "K"],
+    // ["N", "Z"],
+    // ["Z", "N"],
+    // ["O", "Q"],
+    // ["Q", "O"]
+  ]) as CharMap;
+
+  const res = machine.setPlugboard(plug);
+  const map = machine.getPlugboard();
+  console.log(res, machine.plugboard.map, map);
+})();
 
 // The original wirings/mapping used, taken from =>
 // https://en.wikipedia.org/wiki/Enigma_rotor_details#Rotor_wiring_tables
