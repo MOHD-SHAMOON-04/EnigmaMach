@@ -170,35 +170,5 @@ export default class EnigmaEngine {
   }
 }
 
-(() => {
-  const machine = new EnigmaEngine([1, 1, 1]);
-  const plug = new Map([
-    ["A", "M"],
-    ["M", "A"],
-    ["B", "D"],
-    ["D", "B"],
-    // ["C", "L"],
-    // ["L", "C"],
-    // ["E", "P"],
-    // ["P", "E"],
-    // ["F", "H"],
-    // ["H", "F"],
-    // ["G", "S"],
-    // ["S", "G"],
-    // ["I", "J"],
-    // ["J", "I"],
-    // ["K", "X"],
-    // ["X", "K"],
-    // ["N", "Z"],
-    // ["Z", "N"],
-    // ["O", "Q"],
-    // ["Q", "O"]
-  ]) as CharMap;
-
-  const res = machine.setPlugboard(plug);
-  const map = machine.getPlugboard();
-  console.log(res, machine.plugboard.map, map);
-})();
-
 // The original wirings/mapping used, taken from =>
 // https://en.wikipedia.org/wiki/Enigma_rotor_details#Rotor_wiring_tables
