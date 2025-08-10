@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import Keyboard from "../components/Keyboard";
 import Rotor from "../components/Rotor";
 import EnigmaEngine from "../utils/Enigma";
-import type { UseRefMap } from "../types";
+import type { CharMap, UseRefMap } from "../types";
 import TextField from "../components/TextField";
+import Plugboard from "../components/Plugboard";
 
 const enigma = new EnigmaEngine([1, 1, 1]);
 
@@ -134,11 +135,32 @@ function Enigma() {
     }
   }, []);
 
+  const [mapping, setMapping] = useState<CharMap>(enigma.getPlugboard());
+
+  // handler for updating mappings in the machine ----------
+  const handlePlugboardUpdate = (newMapping: CharMap) => {
+    // // PROD
+    enigma.setPlugboard(newMapping);            // update machine
+    setMapping(new Map(enigma.getPlugboard())); // clone to force re-render
+
+    // // DEV
+    // // Enigma update
+    // console.log(`Before Update =>`, enigma.getPlugboard());
+    // const res = enigma.setPlugboard(newMapping);
+    // console.log(`After Update =>`, enigma.getPlugboard());
+    // console.log("Update successful: ", res);
+
+    // // State Update
+    // // setMapping(new Map(enigma.getPlugboard()));
+    // setMapping(new Map(enigma.getPlugboard()));
+  };
+  // handler for updating mappings in the machine ----------
+
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
 
   return (
-    <div>
+    <div className="flex flex-col">
       <div className="flex flex-col-reverse lg:flex-row justify-center lg:items-start mt-4 gap-6 px-4">
 
         {/* Left side: Keyboards */}
@@ -192,7 +214,12 @@ function Enigma() {
       </div>
 
       {/* // Plugboard to be Inserted here */}
-
+      <div className="mt-4 flex">
+        <Plugboard
+          mapping={mapping}
+          updateMapping={handlePlugboardUpdate}
+        />
+      </div>
     </div>
   )
 }
