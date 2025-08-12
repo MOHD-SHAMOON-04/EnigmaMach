@@ -16,12 +16,12 @@
 - Fix rotors on mobile ✅
 - Mobile responsive design ✅
 - Plugboard system Class ✅
-- Plugboard system UI <!-- ✅ -->
-- Add a Reset Button
+- Plugboard system UI ✅
+- Add a Reset Button ✅
 
 ## Plan of action:
-- plugboard UI <!-- ✅ -->
-- reset btn <!-- ✅ -->
+- plugboard UI ✅
+- reset btn ✅
 - refactoring chapter-02
 ---
 <!-- ## backend dev begins -->

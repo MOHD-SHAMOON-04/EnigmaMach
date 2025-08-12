@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Enigma from './pages/Enigma';
 import NotFound from './pages/NotFound';
 import Header from './components/Header';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/enigma" element={<Enigma />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <Footer />
     </div>
   )
 }
