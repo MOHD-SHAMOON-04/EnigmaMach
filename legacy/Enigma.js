@@ -20,7 +20,7 @@ export class Enigma {
     };
     this.setHeads([r1, r2, r3]);
     this.plugboard = {
-      map: "MDLBPHSFJIXCAZQEORGTUVWKYN"
+      map: "SZRDXFGHMJKOIULQPCAVNTYEWB"
     };
   }
 
@@ -156,26 +156,86 @@ export class Enigma {
 
 const machine = new Enigma([11, 11, 11]);
 const plug = new Map([
-  // ["A", "H"],
-  // ["H", "A"],
-  // ["C", "D"],
-  // ["D", "C"],
-  // ["Z", "L"],
-  // ["L", "Z"],
-  ["E", "P"],
-  ["P", "E"],
-  ["F", "H"],
-  ["H", "F"],
-  ["G", "S"],
-  ["S", "G"],
-  ["I", "J"],
-  ["J", "I"],
-  ["K", "X"],
-  ["X", "K"],
-  ["N", "Z"],
-  ["Z", "N"],
-  ["O", "Q"],
-  ["Q", "O"]
+    [
+        "A",
+        "S"
+    ],
+    [
+        "S",
+        "A"
+    ],
+    [
+        "B",
+        "Z"
+    ],
+    [
+        "Z",
+        "B"
+    ],
+    [
+        "C",
+        "R"
+    ],
+    [
+        "R",
+        "C"
+    ],
+    [
+        "E",
+        "X"
+    ],
+    [
+        "X",
+        "E"
+    ],
+    [
+        "I",
+        "M"
+    ],
+    [
+        "M",
+        "I"
+    ],
+    [
+        "L",
+        "O"
+    ],
+    [
+        "O",
+        "L"
+    ],
+    [
+        "N",
+        "U"
+    ],
+    [
+        "U",
+        "N"
+    ],
+    [
+        "P",
+        "Q"
+    ],
+    [
+        "Q",
+        "P"
+    ],
+    [
+        "T",
+        "V"
+    ],
+    [
+        "V",
+        "T"
+    ],
+    [
+        "W",
+        "Y"
+    ],
+    [
+        "Y",
+        "W"
+    ]
 ]);
 
 machine.setPlugboard(plug);
@@ -186,4 +246,4 @@ const decrypted = machine.scrambleString(encrypted);
 
 console.log({ encrypted, decrypted }); // Should give back "HELLO WORLD"
 
-console.log(machine.getPlugboard());
+console.log(machine.plugboard.map);

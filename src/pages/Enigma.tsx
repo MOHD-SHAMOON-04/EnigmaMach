@@ -103,7 +103,7 @@ function Enigma() {
 
   // handler for updating rotor setting ----------
   const handleRotorChange = (index: number, newVal: number) => {
-    console.log(`${index} : ${newVal}`);
+    // console.log(`${index} : ${newVal}`);
     const newRotors = [...rotors];
     newRotors[index] = newVal;
 
@@ -115,7 +115,7 @@ function Enigma() {
   // handler for copying inp/out ----------
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
-      console.log('Copied:', text);
+      // console.log('Copied:', text);
 
     }).catch((err) => {
       console.error('Failed to copy:', err);

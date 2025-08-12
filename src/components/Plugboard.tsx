@@ -1,6 +1,14 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import PlugKey from './PlugKey';
 import type { CharMap } from '../types';
+
+function colorFromChar(char: string): string {
+  const normalized = char.toUpperCase().charCodeAt(0) - 65;
+  const hue = (normalized * 137) % 360;
+  const saturation = 100;
+  const lightness = 50;
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
 
 export default function Plugboard({
   mapping, updateMapping
@@ -12,19 +20,63 @@ export default function Plugboard({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [positions, setPositions] = useState<Record<string, DOMRect>>({});
+  const [waitingKey, setWaitingKey] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // helper function to get Rect() for all the <PlugKey />(s) and store it in the positions [state]
-  const updatePosition = useCallback((char: string, el: HTMLButtonElement | null) => {
-    if (el) {
-      setPositions((prev) => ({
-        ...prev,
-        [char]: el.getBoundingClientRect(),
-      }));
-    }
+  // Detect mobile device
+  useEffect(() => {
+    setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
   }, []);
 
-  // Convert DOMRects to relative coordinates (within container)
-  // name tell its use
+  // Update position for a single key
+  const updatePosition = useCallback((char: string, el: HTMLButtonElement | null) => {
+    if (!el) return;
+
+    const updateRect = () => {
+      const rect = el.getBoundingClientRect();
+      setPositions(prev => ({ ...prev, [char]: rect }));
+    };
+
+    if (isMobile) {
+      setTimeout(updateRect, 10);
+    } else {
+      updateRect();
+    }
+  }, [isMobile]);
+
+  // Recalculate all key positions
+  const recalculateAllPositions = useCallback(() => {
+    const newPositions: Record<string, DOMRect> = {};
+
+    layout.forEach(row => {
+      row.split('').forEach(char => {
+        const el = document.getElementById(`plug-${char}`) as HTMLButtonElement;
+        if (el) {
+          newPositions[char] = el.getBoundingClientRect();
+        }
+      });
+    });
+
+    setPositions(newPositions);
+  }, [layout]);
+
+  // Add effect to handle mobile orientation changes and resize
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleResize = () => setTimeout(recalculateAllPositions, 100);
+    const handleOrientationChange = () => setTimeout(recalculateAllPositions, 300);
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleOrientationChange);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleOrientationChange);
+    };
+  }, [isMobile, recalculateAllPositions]);
+
+  // Convert DOMRects to relative coordinates
   const getRelativeCoords = (char: string): { x: number, y: number } | null => {
     const rect = positions[char];
     const container = containerRef.current?.getBoundingClientRect();
@@ -35,31 +87,20 @@ export default function Plugboard({
     };
   };
 
-  // fancy shit -- lines were barely distinguishable
-  function colorFromChar(char: string): string {
-    const normalized = char.toUpperCase().charCodeAt(0) - 65; // A=0, B=1, ..., Z=25
-    const hue = (normalized * 137) % 360; // multiply by a prime to distribute nicely
-    const saturation = 100; // percentage
-    const lightness = 50; // percentage
+  // Handle plugboard key clicks
+  const handlePlugboardClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    // Prevent default touch behavior that might cause layout shifts
+    if (isMobile && 'touches' in e) {
+      e.preventDefault();
+    }
 
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-  }
-
-  const [waitingKey, setWaitingKey] = useState<string | null>(null);
-
-  // handler for PlugKey click _Event Delegation_
-  const handlePlugboardClick = useCallback((e: React.MouseEvent) => {
     const ele = (e.target as HTMLButtonElement).closest('button._PLUGBOARD_KEY') as HTMLButtonElement;
     if (!ele) return;
 
     const char = ele.dataset.char;
     if (!char) return;
 
-    console.log('Clicked char:', char);
-    // console.log('Current mapping:', mapping);
-
     const mappedTo = mapping.get(char);
-    console.log('Mapped to:', mappedTo);
 
     // If already mapped, remove the pair
     if (mappedTo) {
@@ -67,112 +108,123 @@ export default function Plugboard({
       newMapping.delete(char);
       newMapping.delete(mappedTo);
       updateMapping(newMapping);
-      setWaitingKey(null); // reset temp pair in case
+      setWaitingKey(null);
+
+      // Recalculate positions on mobile after state update
+      if (isMobile) {
+        setTimeout(recalculateAllPositions, 50);
+      }
       return;
     }
 
-    // If not mapped, handle temporary pairing logic
-
-    // no first selected, select current char as first
+    // Handle pairing logic
     if (!waitingKey) {
+      // No key waiting, set current as waiting
       setWaitingKey(char);
       return;
     }
 
-    // If second key already mapped, ignore
-    if (mapping.has(char)) {
-      console.log('Second key is mapped, ignoring');
-      return;
-    }
-
-    // Ignore if clicking same key twice
     if (char === waitingKey) {
+      // Clicking same key twice, cancel
       setWaitingKey(null);
-      console.log('Clicked same key twice, disengage');
       return;
     }
 
-    // Complete pair
-    // complete the pair and update mapping
+    // Create new pair
     const newMapping = new Map(mapping);
     newMapping.set(waitingKey, char);
     newMapping.set(char, waitingKey);
     updateMapping(newMapping);
-    setWaitingKey(null); // reset after adding pair
+    setWaitingKey(null);
 
-  }, [mapping, updateMapping, waitingKey]);
+    // Recalculate positions on mobile after state update
+    if (isMobile) {
+      setTimeout(recalculateAllPositions, 50);
+    }
+  }, [mapping, updateMapping, waitingKey, isMobile, recalculateAllPositions]);
+
+  // Render SVG lines for connections
+  const renderSVGLines = () => {
+    return Array.from(mapping.entries()).map(([from, to], idx) => {
+      // Only draw one direction to avoid duplicate lines
+      if (from > to) return null;
+
+      const p1 = getRelativeCoords(from);
+      const p2 = getRelativeCoords(to);
+
+      // Skip if coordinates are missing
+      if (!p1 || !p2) {
+        // Trigger recalculation on mobile if coordinates are missing
+        if (isMobile) {
+          setTimeout(recalculateAllPositions, 10);
+        }
+        return null;
+      }
+
+      const color = colorFromChar(from);
+
+      return (
+        <g key={`${from}-${to}-${idx}`}>
+          <line
+            x1={p1.x}
+            y1={p1.y}
+            x2={p2.x}
+            y2={p2.y}
+            stroke={color}
+            strokeWidth="2"
+          />
+          <circle
+            cx={p1.x}
+            cy={p1.y}
+            r="12"
+            stroke={color}
+            strokeWidth="2"
+            fill='transparent'
+          />
+          <circle
+            cx={p2.x}
+            cy={p2.y}
+            r="12"
+            stroke={color}
+            strokeWidth="2"
+            fill='transparent'
+          />
+        </g>
+      );
+    });
+  };
 
   return (
     <div
       id={`plug-keyboard`}
       className="_PLUGBOARD relative bg-zinc-700/70 p-2 sm:p-4 rounded mx-auto flex flex-col items-center mb-3 sm:mb-6 gap-3"
       ref={containerRef}
-      onClick={handlePlugboardClick}
+      onClick={!isMobile ? handlePlugboardClick : undefined}
+      onTouchEnd={isMobile ? handlePlugboardClick : undefined}
+      style={{ touchAction: 'manipulation' }}
     >
       <h2 className="mr-auto text-lg sm:text-xl lg:text-2xl font-bold mb-1 lg:mb-2">
         Plugboard
       </h2>
 
       {/* Render lines with SVG */}
-      <svg className="absolute inset-0 pointer-events-none w-full h-full z-0">
-        {Array.from(mapping.entries()).map(([from, to], idx) => {
-          // Only draw one direction (A -> M, skip M -> A)
-          if (from > to) return null;
-          const p1 = getRelativeCoords(from);
-          const p2 = getRelativeCoords(to);
-          if (!p1 || !p2) return null;
-
-          return (
-            <g
-              key={idx}
-            >
-              <line
-                // key={`line-${idx}`}
-                x1={p1.x}
-                y1={p1.y}
-                x2={p2.x}
-                y2={p2.y}
-                stroke={colorFromChar(from)}
-                strokeWidth="2"
-              />
-              <circle
-                // key={`c1-${idx}`}
-                cx={p1.x}
-                cy={p1.y}
-                r="12"
-                stroke={colorFromChar(from)}
-                strokeWidth="2"
-                fill='transparent'
-              />
-              <circle
-                // key={`c2-${idx}`}
-                cx={p2.x}
-                cy={p2.y}
-                r="12"
-                stroke={colorFromChar(from)}
-                strokeWidth="2"
-                fill='transparent'
-              />
-            </g>
-          );
-        })}
+      <svg className="absolute inset-0 pointer-events-none w-full h-full z-10">
+        {renderSVGLines()}
       </svg>
 
-      {/* Render keys */}
-      {layout.map((row, idx) =>
+      {/* Keyboard layout */}
+      {layout.map((row, idx) => (
         <div className="_PLUGBOARD_ROW flex gap-[8.2px] sm:gap-3" key={idx}>
-          {row
-            .split('')
-            .map(char =>
-              <PlugKey
-                char={char}
-                key={`plug-${char}`}
-                reportPosition={updatePosition}
-                isWaiting={char === waitingKey}
-              />)
-          }
+          {row.split('').map(char => (
+            <PlugKey
+              char={char}
+              key={`plug-${char}`}
+              reportPosition={updatePosition}
+              isWaiting={char === waitingKey}
+            />
+          ))}
         </div>
-      )}
+      ))}
     </div>
   );
 }
@@ -221,4 +273,16 @@ export default function Plugboard({
 - Added a "glow" CSS class to visually highlight the waiting key, improving UX by showing which key is waiting for pairing.
 - Confirmed the Enigma machine integration works perfectly with the plugboard updates.
 - Code is clean, efficient, and user-friendly.
+---
+
+=> Clean-up Changes Made:
+1. Consolidated mobile-specific logic into clear sections
+2. Added helpful comments explaining key functionality
+3. Improved JSX formatting with proper parentheses and indentation
+The core issue was that **mobile browsers handle touch events differently** than desktop mouse events, causing the DOM element positions to become invalid when the SVG tried to render. 
+
+=> The solution was to:
+- Use different event handlers for mobile vs desktop
+- Add position recalculation after state updates on mobile
+- Include proper error handling when coordinates are missing
 */

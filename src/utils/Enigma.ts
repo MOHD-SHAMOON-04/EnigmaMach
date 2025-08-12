@@ -31,7 +31,7 @@ export default class EnigmaEngine {
     }
     this.setHeads([r1, r2, r3]);
     this.plugboard = {
-      map: "MDLBPHSFJIXCAZQEORGTUVWKYN"
+      map: "SZRDXFGHMJKOIULQPCAVNTYEWB"
     }
   }
 
