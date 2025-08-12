@@ -31,12 +31,14 @@ export default class EnigmaEngine {
     }
     this.setHeads([r1, r2, r3]);
     this.plugboard = {
+      default: "SZRDXFGHMJKOIULQPCAVNTYEWB",
       map: "SZRDXFGHMJKOIULQPCAVNTYEWB"
     }
   }
 
   reset() {
     this.rotors.forEach(r => r.head = 0);
+    this.plugboard.map = this.plugboard.default;
   }
 
   setHeads([r1, r2, r3]: number[]) {

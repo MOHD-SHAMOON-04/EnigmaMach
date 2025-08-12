@@ -12,11 +12,11 @@ const validKey = (enteredKey: string): boolean => /^[A-Z ]$/.test(enteredKey);
 
 function Enigma() {
   const [rotors, setRotors] = useState([] as number[]);
-  useEffect(() => {
-    setRotors([...enigma.getHeads()]);
-  }, []);
-
   const glowingKey = useRef<UseRefMap>({ inp: null, out: null, key: null });
+  const [mapping, setMapping] = useState<CharMap>(enigma.getPlugboard());
+
+  const [inputText, setInputText] = useState('');
+  const [outputText, setOutputText] = useState('');
 
   // utility for encoding ----------
   const encodeChar = (enteredKey: string) => {
@@ -123,20 +123,6 @@ function Enigma() {
   };
   // handler for copying inp/out ----------
 
-  useEffect(() => {
-    document.addEventListener('keydown', physicalKeyPress);
-    document.addEventListener('keyup', physicalKeyUp);
-    window.addEventListener('blur', windowBlur);
-
-    return () => {
-      document.removeEventListener('keydown', physicalKeyPress);
-      document.removeEventListener('keyup', physicalKeyUp);
-      window.removeEventListener('blur', windowBlur);
-    }
-  }, []);
-
-  const [mapping, setMapping] = useState<CharMap>(enigma.getPlugboard());
-
   // handler for updating mappings in the machine ----------
   const handlePlugboardUpdate = (newMapping: CharMap) => {
     // // PROD
@@ -156,8 +142,29 @@ function Enigma() {
   };
   // handler for updating mappings in the machine ----------
 
-  const [inputText, setInputText] = useState('');
-  const [outputText, setOutputText] = useState('');
+  // Reset Enigma ----------
+  const resetEnigma = () => {
+    enigma.reset();
+    setRotors([...enigma.getHeads()]);
+    glowingKey.current = { inp: null, out: null, key: null };
+    setMapping(new Map(enigma.getPlugboard()));
+    setInputText('');
+    setOutputText('');
+  };
+  // Reset Enigma ----------
+
+  useEffect(() => {
+    setRotors([...enigma.getHeads()]);
+    document.addEventListener('keydown', physicalKeyPress);
+    document.addEventListener('keyup', physicalKeyUp);
+    window.addEventListener('blur', windowBlur);
+
+    return () => {
+      document.removeEventListener('keydown', physicalKeyPress);
+      document.removeEventListener('keyup', physicalKeyUp);
+      window.removeEventListener('blur', windowBlur);
+    }
+  }, []);
 
   return (
     <div className="flex flex-col">
@@ -179,10 +186,38 @@ function Enigma() {
           {/* Right side: Settings */}
           <div
             id="rotors"
-            className="_ROTORS bg-zinc-800 p-2 rounded flex gap-2 justify-center items-center">
-            <h3 className="lg:text-xl font-bold">Setting</h3>
+            className="_ROTORS bg-zinc-800 p-3 lg:p-2 rounded flex flex-col lg:flex-row gap-3 lg:gap-2 justify-center items-center w-full lg:w-auto">
+
+            {/* Header and Reset Button Row */}
+            <div className="flex justify-between items-center w-full lg:w-auto lg:flex-col lg:gap-0">
+              <h3 className="text-lg lg:text-xl font-bold">Settings</h3>
+
+              {/* Reset Button */}
+              <button
+                className="group relative p-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-all duration-200 ease-in-out lg:mt-2"
+                onClick={resetEnigma}
+                title="Reset Enigma"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="18px"
+                  viewBox="0 -960 960 960"
+                  width="18px"
+                  fill="currentColor"
+                  className="transition-transform duration-200 group-hover:rotate-180 group-active:rotate-180 lg:w-5 lg:h-5"
+                >
+                  <path d="M440-122q-121-15-200.5-105.5T160-440q0-66 26-126.5T260-672l57 57q-38 34-57.5 79T240-440q0 88 56 155.5T440-202v80Zm80 0v-80q88-15 144-82.5T720-440q0-100-70-170t-170-70h-3l44 44-56 56-140-140 140-140 56 56-44 44h3q134 0 227 93t93 227q0 121-79.5 211.5T520-122Z" />
+                </svg>
+
+                {/* Tooltip */}
+                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs bg-slate-800 text-slate-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+                  Reset Enigma Machine
+                </span>
+              </button>
+            </div>
+
             {/* The 3 Rotors */}
-            <div className="flex flex-row-reverse">
+            <div className="flex flex-row-reverse justify-center gap-1 w-full lg:w-auto">
               {rotors.map((r, idx) => (
                 <Rotor
                   value={r}
