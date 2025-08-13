@@ -15,7 +15,7 @@ export default function NewMachine() {
     setError('');
 
     try {
-      const response = await fetch(`${API_URL}/enigma/new`, {
+      const response = await fetch(`${API_URL}/enigma/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,7 +28,10 @@ export default function NewMachine() {
         setEmail('');
         setSeed('');
       } else {
-        throw new Error('Failed to generate machine');
+        const data = await response.json();
+        if (data.error) {
+          setError(data.error);
+        }
       }
     } catch (err) {
       setError('Something went wrong. Please try again later.');
