@@ -240,24 +240,24 @@ function Enigma() {
   return (
     <div className="flex flex-col">
       {/* Sliding Machine Status Notifications */}
-      <div className="fixed top-4 right-4 z-50 space-y-2 scale-90 sm:scale-100">
+      <div className="absolute top-2 right-2 z-50 space-y-2 scale-75 sm:scale-90 lg:scale-100">
         {/* Loading Notification */}
         {machineStatus.loading && (
           <div className={`transform transition-all duration-500 ease-out ${machineStatus.show
-            ? 'translate-x-0 opacity-100 scale-100'
-            : 'translate-x-full opacity-0 scale-95'
+            ? 'opacity-100 scale-100'
+            : 'opacity-0 scale-95'
             }`}>
-            <div className="bg-slate-900/95 backdrop-blur-md border border-blue-500/50 p-4 rounded-xl shadow-2xl min-w-[300px]">
-              <div className="flex items-center gap-3">
+            <div className="bg-slate-900/95 backdrop-blur-md border border-blue-500/50 p-3 sm:p-4 rounded-xl shadow-2xl min-w-[250px] sm:min-w-[300px]">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <div className="relative">
-                  <svg className="animate-spin w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="animate-spin w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                   <div className="absolute inset-0 border-2 border-blue-400/20 rounded-full animate-ping"></div>
                 </div>
                 <div>
-                  <p className="text-blue-300 font-medium">Loading Configuration</p>
-                  <p className="text-blue-200/70 text-sm">Fetching machine data...</p>
+                  <p className="text-blue-300 font-medium text-sm sm:text-base">Loading Configuration</p>
+                  <p className="text-blue-200/70 text-xs sm:text-sm">Fetching machine data...</p>
                 </div>
               </div>
             </div>
@@ -267,22 +267,22 @@ function Enigma() {
         {/* Success Notification */}
         {machineStatus.success && (
           <div className={`transform transition-all duration-500 ease-out ${machineStatus.show
-            ? 'translate-x-0 opacity-100 scale-100'
-            : 'translate-x-full opacity-0 scale-95'
+            ? 'opacity-100 scale-100'
+            : 'opacity-0 scale-95'
             }`}>
-            <div className="bg-slate-900/95 backdrop-blur-md border border-emerald-500/50 p-4 rounded-xl shadow-2xl min-w-[300px]">
-              <div className="flex items-start gap-3">
+            <div className="bg-slate-900/95 backdrop-blur-md border border-emerald-500/50 p-3 sm:p-4 rounded-xl shadow-2xl min-w-[250px] sm:min-w-[300px]">
+              <div className="flex items-start gap-2 sm:gap-3">
                 <div className="relative">
-                  <div className="w-6 h-6 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                    <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                   <div className="absolute inset-0 border-2 border-emerald-400/20 rounded-full animate-ping"></div>
                 </div>
                 <div className="flex-1">
-                  <p className="text-emerald-300 font-medium">Configuration Loaded!</p>
-                  <p className="text-emerald-200/70 text-sm">
+                  <p className="text-emerald-300 font-medium text-sm sm:text-base">Configuration Loaded!</p>
+                  <p className="text-emerald-200/70 text-xs sm:text-sm">
                     Machine ID: <span className="font-mono text-emerald-300">{machineId}</span>
                   </p>
                 </div>
@@ -294,31 +294,31 @@ function Enigma() {
         {/* Error Notification */}
         {machineStatus.error && (
           <div className={`transform transition-all duration-500 ease-out ${machineStatus.show
-            ? 'translate-x-0 opacity-100 scale-100'
-            : 'translate-x-full opacity-0 scale-95'
+            ? 'opacity-100 scale-100'
+            : 'opacity-0 scale-95'
             }`}>
-            <div className="bg-slate-900/95 backdrop-blur-md border border-red-500/50 p-4 rounded-xl shadow-2xl min-w-[300px] max-w-[400px]">
-              <div className="flex items-start gap-3">
+            <div className="bg-slate-900/95 backdrop-blur-md border border-red-500/50 p-3 sm:p-4 rounded-xl shadow-2xl min-w-[250px] sm:min-w-[300px] max-w-[320px] sm:max-w-[400px]">
+              <div className="flex items-start gap-2 sm:gap-3">
                 <div className="relative">
-                  <div className="w-6 h-6 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                 </div>
                 <div className="flex-1">
-                  <p className="text-red-300 font-medium">Configuration Failed</p>
-                  <p className="text-red-200/70 text-sm mt-1 leading-relaxed">{machineStatus.error}</p>
-                  <div className="flex gap-2 mt-3">
+                  <p className="text-red-300 font-medium text-sm sm:text-base">Configuration Failed</p>
+                  <p className="text-red-200/70 text-xs sm:text-sm mt-1 leading-relaxed">{machineStatus.error}</p>
+                  <div className="flex gap-1.5 sm:gap-2 mt-2 sm:mt-3">
                     <button
                       onClick={() => window.location.reload()}
-                      className="text-xs bg-red-600/20 hover:bg-red-600/30 text-red-300 hover:text-red-200 px-3 py-1.5 rounded-lg transition-all duration-200 font-medium"
+                      className="text-xs bg-red-600/20 hover:bg-red-600/30 text-red-300 hover:text-red-200 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-all duration-200 font-medium"
                     >
                       Retry
                     </button>
                     <button
                       onClick={dismissError}
-                      className="text-xs bg-slate-600/20 hover:bg-slate-600/30 text-slate-300 hover:text-slate-200 px-3 py-1.5 rounded-lg transition-all duration-200 font-medium"
+                      className="text-xs bg-slate-600/20 hover:bg-slate-600/30 text-slate-300 hover:text-slate-200 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-all duration-200 font-medium"
                     >
                       Dismiss
                     </button>

@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { hashStr } from "./cryptoUtils";
 
 /**
  * Deterministically shuffles a string using a cryptographic hash of the seed
@@ -31,9 +31,4 @@ function getNextRandom(hash: string): number {
   return parseInt(hex, 16) / 0xFFFFFFFF;
 }
 
-/**
- * Hashes a string by SHA256
- */
-const hashStr = (s: string) => createHash('sha256').update(s).digest('hex');
-
-export { deterministicShuffle as shuffle, hashStr };
+export { deterministicShuffle as shuffle };

@@ -1,17 +1,33 @@
 import { Router, Request, Response } from "express";
 import { EnigmaMachine } from "../models/enigma.model";
 import generateEnigmaMachine from "../utils/createEnigma";
-import sendNewEnigmaMail from "../services/sendEmail";
+import { validEmail, validString } from "../utils/validators";
+import { sendEnigmaMail } from "../services/mailer";
+import rateLimit from 'express-rate-limit';
 
 const enigmaRouter = Router();
-const validEmail = (email: string): boolean => {
-  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-  return regex.test(email);
-}
+// Rate limiting configs
+const hardLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
-enigmaRouter.get('/', async (req: Request, res: Response) => {
-  const { machineId } = req.query;
+const softLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({ error: 'Too many requests, please try again later.' });
+  }
+});
+
+enigmaRouter.get('/', softLimiter, async (req: Request, res: Response) => {
+  const machineId = req.query.machineId as string | undefined;
 
   if (machineId && typeof machineId === 'string') {
     try {
@@ -36,16 +52,10 @@ enigmaRouter.get('/', async (req: Request, res: Response) => {
   return res.status(400).json({ error: "machineId must be provided" });
 });
 
-enigmaRouter.post('/', async (req: Request, res: Response) => {
+enigmaRouter.post('/', hardLimiter, async (req: Request, res: Response) => {
   const { seed, email } = req.body;
 
-  if (
-    !seed ||
-    !email ||
-    typeof seed !== 'string' ||
-    typeof email !== 'string' ||
-    !validEmail(email)
-  ) {
+  if (!validString(seed) || !validEmail(email)) {
     return res.status(400).json({ error: "Both seed and email must be valid" });
   }
 
@@ -67,11 +77,12 @@ enigmaRouter.post('/', async (req: Request, res: Response) => {
     await newMachine.save();
 
     // send mail here
-    const success = await sendNewEnigmaMail(email, newMachine);
-    if (success)
-      res.json({ message: "Check your email to get your new machine" });
-    else
-      res.status(500).json({ error: "Failed to send email" });
+    const mailSent = await sendEnigmaMail(email, newMachine);
+    if (mailSent) {
+      res.json({ message: "Email sent successfully" });
+    } else {
+      return res.status(500).json({ error: "Failed to send email" });
+    }
 
   } catch (error) {
     console.error("Error:", error);

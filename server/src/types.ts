@@ -11,3 +11,13 @@ export interface EnigmaMachineDoc extends Document, EnigmaMachine {
   email: string;
   createdAt: Date;
 }
+
+export interface User {
+  email: string;
+  password: string;
+  salt: string;
+  createdAt: Date;
+}
+
+export interface UserDoc extends Document, User {
+}

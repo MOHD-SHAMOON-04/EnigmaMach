@@ -12,6 +12,8 @@ import { connectDB } from './services/db';
 const app = express();
 const PORT = process.env.PORT || 5000;
 connectDB();
+
+// CORS config stuff
 const allowedOrigins = [process.env.BASE_URL, 'http://localhost:5173'];
 const corsOptions = {
   origin: (origin: any, callback: any) => {
