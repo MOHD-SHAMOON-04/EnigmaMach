@@ -5,7 +5,7 @@ dotenv.config({ quiet: true });
 export async function connectDB() {
   try {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/enigma');
-    console.log('MongoDB connected successfully');
+    console.log('MongoDB connected successfully\nHOST: ', mongoose.connection.host);
   } catch (error) {
     console.error('MongoDB connection error:', error);
     process.exit(1);

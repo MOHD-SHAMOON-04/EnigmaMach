@@ -1,15 +1,7 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model } from 'mongoose';
+import type { EnigmaMachineDoc } from '../types';
 
-interface IEnigmaMachine extends Document {
-  rotors: string[];
-  reflector: string;
-  plugboard: string;
-  seed: string;
-  email: string;
-  createdAt: Date;
-}
-
-const enigmaMachineSchema = new Schema<IEnigmaMachine>({
+const enigmaMachineSchema = new Schema<EnigmaMachineDoc>({
   rotors: { type: [String], required: true },
   reflector: { type: String, required: true },
   plugboard: { type: String, required: true },
@@ -18,4 +10,4 @@ const enigmaMachineSchema = new Schema<IEnigmaMachine>({
   createdAt: { type: Date, default: Date.now }
 });
 
-export const EnigmaMachine = model<IEnigmaMachine>('EnigmaMachine', enigmaMachineSchema);
+export const EnigmaMachine = model<EnigmaMachineDoc>('EnigmaMachine', enigmaMachineSchema);

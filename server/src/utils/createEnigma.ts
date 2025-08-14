@@ -1,12 +1,5 @@
-import { shuffle, hashStr } from "./shuffle";
-
-interface EnigmaMachine {
-  rotors: string[];
-  reflector: string;
-  plugboard: string;
-  seed: string;
-  machineId: string;
-}
+import { shuffle } from "./shuffle";
+import { EnigmaMachine } from "../types";
 
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -54,8 +47,7 @@ function generateEnigmaMachine(seed: string): EnigmaMachine {
     rotors: [rotor1, rotor2, rotor3],
     reflector,
     plugboard,
-    seed,
-    machineId: hashStr(seed)
+    seed
   };
 }
 
