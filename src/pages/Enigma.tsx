@@ -6,7 +6,8 @@ import type { CharMap, UseRefMap } from "../types";
 import TextField from "../components/TextField";
 import Plugboard from "../components/Plugboard";
 import { useParams } from "react-router";
-import { API_URL } from "./constants";
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const enigma = new EnigmaEngine([1, 1, 1]);
 
