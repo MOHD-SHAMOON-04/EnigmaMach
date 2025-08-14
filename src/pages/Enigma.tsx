@@ -5,6 +5,8 @@ import EnigmaEngine from "../utils/Enigma";
 import type { CharMap, UseRefMap } from "../types";
 import TextField from "../components/TextField";
 import Plugboard from "../components/Plugboard";
+import { useParams } from "react-router";
+import { API_URL } from "./constants";
 
 const enigma = new EnigmaEngine([1, 1, 1]);
 
@@ -18,6 +20,16 @@ function Enigma() {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
 
+  // Machine fetch status states
+  const [machineStatus, setMachineStatus] = useState<{
+    loading: boolean;
+    success: boolean;
+    error: string | null;
+    show: boolean;
+  }>({ loading: false, success: false, error: null, show: false });
+
+  const { machineId } = useParams();
+
   // utility for encoding ----------
   const encodeChar = (enteredKey: string) => {
     const encoded = enigma.scrambleChar(enteredKey);
@@ -29,6 +41,7 @@ function Enigma() {
 
   // Keyboard events handling ----------
   const physicalKeyPress = (e: KeyboardEvent) => {
+    if (e.key === " ") e.preventDefault();
     const enteredKey = e.key.toUpperCase();
 
     if (!validKey(enteredKey)) return;
@@ -166,8 +179,156 @@ function Enigma() {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchMachine = async () => {
+      if (!machineId) return;
+
+      setMachineStatus({ loading: true, success: false, error: null, show: true });
+
+      try {
+        const res = await fetch(`${API_URL}/enigma?machineId=${machineId}`);
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch machine: ${res.status} ${res.statusText}`);
+        }
+
+        const data = await res.json();
+
+        // Validate the data structure
+        if (!data || typeof data !== 'object') {
+          throw new Error('Invalid machine data received');
+        }
+
+        enigma.setAllDefaults(data);
+        resetEnigma();
+        setMapping(new Map(enigma.getPlugboard()));
+
+        setMachineStatus({ loading: false, success: true, error: null, show: true });
+
+        // Auto-hide success notification after 4 seconds with slide out
+        setTimeout(() => {
+          setMachineStatus(prev => ({ ...prev, show: false }));
+        }, 4000);
+
+        // Remove from DOM after animation completes
+        setTimeout(() => {
+          setMachineStatus(prev => ({ ...prev, success: false }));
+        }, 4500);
+
+      } catch (error) {
+        console.error('Machine fetch error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load machine configuration';
+        setMachineStatus({ loading: false, success: false, error: errorMessage, show: true });
+
+        setTimeout(() => {
+          setMachineStatus(prev => ({ ...prev, show: false }));
+        }, 10000);
+      }
+    };
+
+    fetchMachine();
+  }, [machineId]);
+
+  const dismissError = () => {
+    setMachineStatus(prev => ({ ...prev, show: false }));
+    setTimeout(() => {
+      setMachineStatus(prev => ({ ...prev, error: null }));
+    }, 300);
+  };
+
   return (
     <div className="flex flex-col">
+      {/* Sliding Machine Status Notifications */}
+      <div className="fixed top-4 right-4 z-50 space-y-2 scale-90 sm:scale-100">
+        {/* Loading Notification */}
+        {machineStatus.loading && (
+          <div className={`transform transition-all duration-500 ease-out ${machineStatus.show
+            ? 'translate-x-0 opacity-100 scale-100'
+            : 'translate-x-full opacity-0 scale-95'
+            }`}>
+            <div className="bg-slate-900/95 backdrop-blur-md border border-blue-500/50 p-4 rounded-xl shadow-2xl min-w-[300px]">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <svg className="animate-spin w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <div className="absolute inset-0 border-2 border-blue-400/20 rounded-full animate-ping"></div>
+                </div>
+                <div>
+                  <p className="text-blue-300 font-medium">Loading Configuration</p>
+                  <p className="text-blue-200/70 text-sm">Fetching machine data...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Success Notification */}
+        {machineStatus.success && (
+          <div className={`transform transition-all duration-500 ease-out ${machineStatus.show
+            ? 'translate-x-0 opacity-100 scale-100'
+            : 'translate-x-full opacity-0 scale-95'
+            }`}>
+            <div className="bg-slate-900/95 backdrop-blur-md border border-emerald-500/50 p-4 rounded-xl shadow-2xl min-w-[300px]">
+              <div className="flex items-start gap-3">
+                <div className="relative">
+                  <div className="w-6 h-6 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="absolute inset-0 border-2 border-emerald-400/20 rounded-full animate-ping"></div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-emerald-300 font-medium">Configuration Loaded!</p>
+                  <p className="text-emerald-200/70 text-sm">
+                    Machine ID: <span className="font-mono text-emerald-300">{machineId}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error Notification */}
+        {machineStatus.error && (
+          <div className={`transform transition-all duration-500 ease-out ${machineStatus.show
+            ? 'translate-x-0 opacity-100 scale-100'
+            : 'translate-x-full opacity-0 scale-95'
+            }`}>
+            <div className="bg-slate-900/95 backdrop-blur-md border border-red-500/50 p-4 rounded-xl shadow-2xl min-w-[300px] max-w-[400px]">
+              <div className="flex items-start gap-3">
+                <div className="relative">
+                  <div className="w-6 h-6 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-red-300 font-medium">Configuration Failed</p>
+                  <p className="text-red-200/70 text-sm mt-1 leading-relaxed">{machineStatus.error}</p>
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="text-xs bg-red-600/20 hover:bg-red-600/30 text-red-300 hover:text-red-200 px-3 py-1.5 rounded-lg transition-all duration-200 font-medium"
+                    >
+                      Retry
+                    </button>
+                    <button
+                      onClick={dismissError}
+                      className="text-xs bg-slate-600/20 hover:bg-slate-600/30 text-slate-300 hover:text-slate-200 px-3 py-1.5 rounded-lg transition-all duration-200 font-medium"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="flex flex-col-reverse lg:flex-row justify-center lg:items-start mt-4 gap-6 px-4">
 
         {/* Left side: Keyboards */}

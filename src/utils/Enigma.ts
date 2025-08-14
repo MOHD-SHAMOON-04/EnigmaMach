@@ -1,4 +1,4 @@
-import type { Reflector, Rotor, Plugboard, CharMap } from '../types';
+import type { Reflector, Rotor, Plugboard, CharMap, initDefault } from '../types';
 
 export default class EnigmaEngine {
   validChars: string;
@@ -169,6 +169,17 @@ export default class EnigmaEngine {
     }
 
     return newChar;
+  }
+
+  setAllDefaults({ rotors, reflector, plugboard }: initDefault) {
+    for (let i = 0; i < rotors.length; i++) {
+      this.rotors[i].map = rotors[i];
+    }
+
+    this.reflector.map = reflector;
+
+    this.plugboard.map = plugboard;
+    this.plugboard.default = plugboard;
   }
 }
 

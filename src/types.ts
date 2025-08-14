@@ -20,6 +20,12 @@ export interface Plugboard extends Reflector {
   default: string;
 }
 
+export interface initDefault {
+  rotors: string[];
+  reflector: string;
+  plugboard: string;
+}
+
 export type CharMap = Map<string, string>;
 
 export interface UseRefMap {

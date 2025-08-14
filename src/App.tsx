@@ -14,7 +14,7 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/enigma" element={<Enigma />} />
+        <Route path="/enigma/:machineId?" element={<Enigma />} />
         <Route path="/new-machine" element={<NewMachine />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
