@@ -32,7 +32,7 @@ This project is a recreation of the famous Enigma machine, a cipher device used 
 *   cors
 
 ## Project Structure
-```bash
+```
 root/
 |-- src/                     # Frontend source code
 |   |-- components/          # React components
