@@ -333,7 +333,7 @@ function Enigma() {
       <div className="flex flex-col-reverse lg:flex-row justify-center lg:items-start mt-4 gap-6 px-4">
 
         {/* Left side: Keyboards */}
-        <div className="flex flex-col justify-center items-center">
+        <div className="flex flex-col-reverse lg:flex-col justify-center items-center">
           <Keyboard type="out" />
 
           <Keyboard
